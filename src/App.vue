@@ -1,29 +1,74 @@
 <script>
-export default {
-  data() {
+let id = 0
+
+export default 
+{
+  data() 
+  {
     return { 
       titleClass: 'title',
       message: 'Hello World',
-      counter: {
+      counter: 
+      {
         count: 3
       },
       text1: '',
       text2: '',
-      awesome: true
+      awesome: true,
+      newTodo: '',
+      hideCompleted: false,
+      todos: [
+        { id: id++, text: 'Learn HTML',done: false},
+        { id: id++, text: 'Learn JavaScript',done: false},
+        { id: id++, text: 'Learn Vue',done: false}
+      ] // Todos list
     }
   }, // Data
-  methods: {
-    increment() {
+  computed: 
+  {
+    filteredTodos() 
+    {
+      return this.hideCompleted ? this.todos.filter( t=> !t.done ) : this.todos
+    }
+  },
+  methods: 
+  {
+    increment() 
+    {
       this.counter.count++; // Update count variable
     },
     onInput(e)
     {
       this.text1 = e.target.value;
     },
-    toggle()
+    toggle() 
     {
       this.awesome = !this.awesome;
+    },
+    addTodo()
+    {
+      if(!(this.newTodo === "")) // Don't allow empty string
+      {
+        this.todos.push({id: id++, text: this.newTodo});
+        this.newTodo='';
+      }
+    },
+    removeTodo(todo)
+    {
+      let i = todo.id;
+
+      // Remove element from the list
+      this.todos.splice(todo.id,1); 
+
+      // Update all element todo id's for all todo's after
+      while(i < this.todos.length)
+      {
+        this.todos[i].id--;
+        i++;
+      }
+      id--; // Update the id varaible
     }
+    
   } // Methods
 }
 </script>
@@ -44,14 +89,39 @@ export default {
   <input v-model="text2" placeholder="Text...">
   <p>{{ text2 }}</p>
 
+  <!-- Toggle different states for headers -->
   <button @click="toggle"> Toggle </button>
   <h2 v-if="awesome">Vue is awesome!</h2>
   <h2 v-else>:(</h2>
+
+  <!-- Create a Todo list that can be added to a removed from -->
+
+  <form @submit.prevent="addTodo">
+    <input v-model="newTodo">
+    <button>Add Todo</button>
+  </form>
+
+  <ul>
+    <li v-for="todo in filteredTodos" :key="todo.id">
+
+      <input type="checkbox" v-model="todo.done">
+
+      <span :class="{ done: todo.done }"> {{ todo.text }} </span>
+      <!-- {{ todo.id }} -->
+      <button @click="removeTodo(todo)">X</button>
+    </li>
+  </ul>
+  <button @click="hideCompleted = !hideCompleted">
+    {{ hideCompleted ? 'Show all' : 'Hide completed'}}
+  </button>
 
 </template>
 
 <style>
 .title {
   color: red;
+}
+.done {
+  text-decoration: line-through;
 }
 </style>

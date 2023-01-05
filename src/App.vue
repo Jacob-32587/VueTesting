@@ -3,19 +3,27 @@ let id = 0
 
 export default 
 {
+  mounted()
+  {
+    this.$refs.p.textContent = 'mo';
+    this.fetchData();
+  },
   data() 
   {
     return { 
       titleClass: 'title',
       message: 'Hello World',
+      count: 0,
       counter: 
       {
         count: 3
       },
       text1: '',
       text2: '',
+      todoId: 0,
       awesome: true,
       newTodo: '',
+      todoData: null,
       hideCompleted: false,
       todos: [
         { id: id++, text: 'Learn HTML',done: false},
@@ -24,6 +32,13 @@ export default
       ] // Todos list
     }
   }, // Data
+  watch:
+  {
+    todoId()
+    {
+      this.fetchData();
+    }
+  }, // Watchers
   computed: 
   {
     filteredTodos() 
@@ -52,7 +67,7 @@ export default
         this.todos.push({id: id++, text: this.newTodo});
         this.newTodo='';
       }
-    },
+    }, // Data
     removeTodo(todo)
     {
       let i = todo.id;
@@ -67,8 +82,13 @@ export default
         i++;
       }
       id--; // Update the id varaible
+    },
+    async fetchData()
+    {
+      this.todoData = null
+      const res = await fetch(`https://jsonplaceholder.typicode.com/todos/${this.todoId}`)
+      this.todoData = await res.json();
     }
-    
   } // Methods
 }
 </script>
@@ -114,6 +134,17 @@ export default
   <button @click="hideCompleted = !hideCompleted">
     {{ hideCompleted ? 'Show all' : 'Hide completed'}}
   </button>
+
+  <!-- Element that is accessed by refrence -->
+
+  <p ref="p"> Bruh </p>
+
+  <!-- Fetch each todo element -->
+  <p> Todo id: {{this.todoId}} </p>
+  <div></div>
+  <button @click="todoId++"> Get next todo </button>
+  <p v-if="!todoData">Loading...</p>
+  <p v-else>{{todoData}}</p>
 
 </template>
 
